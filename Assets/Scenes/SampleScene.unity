@@ -251,12 +251,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb60bb67e9e4fb247a1b47cd362dbc7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tile: {fileID: 7482667652216324306, guid: 87276f800660b9d4eb4646146434cbef, type: 3}
+  stone: {fileID: 21300000, guid: 957aed177a4d7d34b948a3cc0d4ef019, type: 3}
+  grass: {fileID: 21300000, guid: c1b3c17faa66228459f09c8016d9768c, type: 3}
+  dirt: {fileID: 21300000, guid: 8a4dc49360299814192d8d5daac6a27c, type: 3}
+  log: {fileID: 21300000, guid: 38d640931b279b64098e19fad378ca10, type: 3}
+  leaf: {fileID: 21300000, guid: eae6a4fe722f6ab43990f2c67afd8cb9, type: 3}
+  treeChance: 15
+  minTreeHeight: 4
+  maxTreeHeight: 6
+  chunckSize: 20
+  generatCaves: 1
   surfaceValue: 0.25
   worldSize: 100
-  caveFreq: 0.05
-  terrainFreq: 0.05
-  heightMultiplier: 4
+  heightMultiplier: 25
   heightAddition: 25
-  seed: 0
+  dirtLayerHeight: 5
+  caveFreq: 0.08
+  terrainFreq: 0.04
+  seed: -5229
   texture: {fileID: 0}
+  worldChunks: []
