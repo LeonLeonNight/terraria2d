@@ -13,6 +13,9 @@ public class TerrainGeneration : MonoBehaviour
     public int minTreeHeight = 4;
     public int maxTreeHeight = 6;
 
+    [Header("Addons")]
+    public int tallGrassChance = 10;
+
     [Header("Generation Settings")]
     public int chunckSize = 20; // ошибка при делении 100 на 16 как пример
     public bool generatCaves = true;
@@ -110,7 +113,7 @@ public class TerrainGeneration : MonoBehaviour
                 {
                     tileSprites = tileAtlas.stone.TileSprites;
 
-                    if (ores[0].spreadTexture.GetPixel(x, y).r > 0.5f && height- y > ores[0].maxSpawnHeight)
+                    if (ores[0].spreadTexture.GetPixel(x, y).r > 0.5f && height - y > ores[0].maxSpawnHeight)
                         tileSprites = tileAtlas.coal.TileSprites;
                     if (ores[1].spreadTexture.GetPixel(x, y).r > 0.5f && height - y > ores[1].maxSpawnHeight)
                         tileSprites = tileAtlas.iron.TileSprites;
@@ -148,6 +151,15 @@ public class TerrainGeneration : MonoBehaviour
                     {
                         if (worldTiles.Contains(new Vector2(x, y)))
                         { GenerateTree(x, y + 1); }
+                    }
+                    else
+                    {
+                        int i = UnityEngine.Random.Range(0, tallGrassChance);
+                        if (i == 1)
+                        {
+                            if (worldTiles.Contains(new Vector2(x, y)))
+                            { PlaceTile(tileAtlas.tallGrass.TileSprites, x, y + 1); }
+                        }
                     }
                 }
             }

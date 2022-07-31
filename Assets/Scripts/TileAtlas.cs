@@ -11,6 +11,8 @@ public class TileAtlas : ScriptableObject
     [SerializeField] public TileClass log;
     [SerializeField] public TileClass leaf;
 
+    [SerializeField] public TileClass tallGrass;
+
     [SerializeField] public TileClass coal;
     [SerializeField] public TileClass iron;
     [SerializeField] public TileClass gold;
