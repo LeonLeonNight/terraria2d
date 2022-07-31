@@ -5,43 +5,85 @@ using UnityEngine;
 
 public class TerrainGeneration : MonoBehaviour
 {
-    [Header("Sprites textures")]
-    public Sprite stone;
-    public Sprite grass;
-    public Sprite dirt;
-    public Sprite log;
-    public Sprite leaf;
+    [Header("Tile Atlas")]
+    public TileAtlas tileAtlas;
 
     [Header("Tree confs")]
-    public int treeChance = 10;
+    public int treeChance = 15;
     public int minTreeHeight = 4;
-    public int maxTreeHeight = 7;
+    public int maxTreeHeight = 6;
 
     [Header("Generation Settings")]
     public int chunckSize = 20; // ошибка при делении 100 на 16 как пример
     public bool generatCaves = true;
     public float surfaceValue = 0.25f;
     public int worldSize = 100;
-    public float heightMultiplier = 4f;
+    public float heightMultiplier = 25;
     public int heightAddition = 25;
     public int dirtLayerHeight = 5;
 
     [Header("Noise Settings")]
-    public float caveFreq = 0.05f;
-    public float terrainFreq = 0.05f;
-    public float seed;
-    public Texture2D texture;
+    public float caveFreq = 0.04f;
+    public float terrainFreq = 0.08f;
+    public float seed = -5229;
+    public Texture2D caveNoiseTexture;
 
-    public GameObject[] worldChunks;
+    [Header("Ore Settings")]
+    public float coalRarity;//0.1
+    public float coalSize;//0.8
+    public float ironRarity, ironSize; //0.09 0.8
+    public float goldRarity, goldSize; //0.2 0.9
+    public float diamondRarity, diamondSize; // 0.8 0.93
+
+    public Texture2D coalSpread;
+    public Texture2D ironSpread;
+    public Texture2D goldSpread;
+    public Texture2D diamondSpread;
+
+    private GameObject[] worldChunks;
     private List<Vector2> worldTiles = new List<Vector2>();
+
+    void OnValidate()
+    {
+        if (caveNoiseTexture == null)
+        {
+            caveNoiseTexture = new Texture2D(worldSize, worldSize);
+            coalSpread = new Texture2D(worldSize, worldSize);
+            ironSpread = new Texture2D(worldSize, worldSize);
+            goldSpread = new Texture2D(worldSize, worldSize);
+            diamondSpread = new Texture2D(worldSize, worldSize);
+        }
+
+        GenerationNoiseTexture(caveFreq, surfaceValue, caveNoiseTexture);
+        //ores
+        GenerationNoiseTexture(coalRarity, coalSize, coalSpread);
+        GenerationNoiseTexture(ironRarity, ironSize, ironSpread);
+        GenerationNoiseTexture(goldRarity, goldSize, goldSpread);
+        GenerationNoiseTexture(diamondRarity, diamondSize, diamondSpread);
+
+    }
 
     void Start()
     {
         seed = UnityEngine.Random.Range(-100, 100);
-        GenerationMapTexture();
+        if (caveNoiseTexture == null)
+        {
+            caveNoiseTexture = new Texture2D(worldSize, worldSize);
+            coalSpread = new Texture2D(worldSize, worldSize);
+            ironSpread = new Texture2D(worldSize, worldSize);
+            goldSpread = new Texture2D(worldSize, worldSize);
+            diamondSpread = new Texture2D(worldSize, worldSize);
+        }
+
+        GenerationNoiseTexture(caveFreq, surfaceValue, caveNoiseTexture);
+        //ores
+        GenerationNoiseTexture(coalRarity, coalSize, coalSpread);
+        GenerationNoiseTexture(ironRarity, ironSize, ironSpread);
+        GenerationNoiseTexture(goldRarity, goldSize, goldSpread);
+        GenerationNoiseTexture(diamondRarity, diamondSize, diamondSpread);
+
         CreateChunks();
         GenerationTiles();
-        
     }
 
     public void CreateChunks()
@@ -49,7 +91,7 @@ public class TerrainGeneration : MonoBehaviour
         int numChunks = worldSize / chunckSize;
         worldChunks = new GameObject[numChunks];
 
-        for (int i =0; i < numChunks; i++)
+        for (int i = 0; i < numChunks; i++)
         {
             GameObject newChunk = new GameObject();
             newChunk.name = i.ToString();
@@ -70,21 +112,30 @@ public class TerrainGeneration : MonoBehaviour
 
                 if (y < height - dirtLayerHeight)
                 {
-                    tileSprite = stone;
+                    if (coalSpread.GetPixel(x, y).r > 0.5f)
+                        tileSprite = tileAtlas.coal.TileSprite;
+                    else if (ironSpread.GetPixel(x, y).r > 0.5f)
+                        tileSprite = tileAtlas.iron.TileSprite;
+                    else if (goldSpread.GetPixel(x, y).r > 0.5f)
+                        tileSprite = tileAtlas.gold.TileSprite;
+                    else if (diamondSpread.GetPixel(x, y).r > 0.5f)
+                        tileSprite = tileAtlas.diamond.TileSprite;
+                    else 
+                        tileSprite = tileAtlas.stone.TileSprite;
                 }
                 else if (y < height - 1)
                 {
-                    tileSprite = dirt;
+                    tileSprite = tileAtlas.dirt.TileSprite;
                 }
                 else
                 {
                     //top layer of the terrain
-                    tileSprite = grass;
+                    tileSprite = tileAtlas.grass.TileSprite;
                 }
 
                 if (generatCaves)
                 {
-                    if (texture.GetPixel(x, y).r > surfaceValue)
+                    if (caveNoiseTexture.GetPixel(x, y).r > 0.5f)
                     {
                         PlaceTile(tileSprite, x, y);
                     }
@@ -107,20 +158,21 @@ public class TerrainGeneration : MonoBehaviour
         }
     }
 
-    public void GenerationMapTexture()
+    public void GenerationNoiseTexture(float frequency, float limit, Texture2D noiseTexture)
     {
-        texture = new Texture2D(worldSize, worldSize);
-
-        for (int x = 0; x < texture.width; x++)
+        for (int x = 0; x < noiseTexture.width; x++)
         {
-            for (int y = 0; y < texture.height; y++)
+            for (int y = 0; y < noiseTexture.height; y++)
             {
-                float v = Mathf.PerlinNoise((x + seed) * caveFreq, (y + seed) * caveFreq);
-                texture.SetPixel(x, y, new Color(v, v, v));
+                float v = Mathf.PerlinNoise((x + seed) * frequency, (y + seed) * frequency);
+                if (v > limit)
+                    noiseTexture.SetPixel(x, y, Color.white);
+                else
+                    noiseTexture.SetPixel(x, y, Color.black);
             }
         }
 
-        texture.Apply();
+        noiseTexture.Apply();
     }
 
     public void GenerateTree(int x, int y)
@@ -128,19 +180,19 @@ public class TerrainGeneration : MonoBehaviour
         int treeHeight = UnityEngine.Random.Range(minTreeHeight, maxTreeHeight);
         for (int i = 0; i < treeHeight; i++)
         {
-            PlaceTile(log, x, y + i);
+            PlaceTile(tileAtlas.log.TileSprite, x, y + i);
         }
 
-        PlaceTile(leaf, x, y + treeHeight);
+        PlaceTile(tileAtlas.leaf.TileSprite, x, y + treeHeight);
 
-        PlaceTile(leaf, x, y + treeHeight + 1);
-        PlaceTile(leaf, x, y + treeHeight + 2);
+        PlaceTile(tileAtlas.leaf.TileSprite, x, y + treeHeight + 1);
+        PlaceTile(tileAtlas.leaf.TileSprite, x, y + treeHeight + 2);
 
-        PlaceTile(leaf, x - 1, y + treeHeight + 1);
-        PlaceTile(leaf, x - 1, y + treeHeight);
+        PlaceTile(tileAtlas.leaf.TileSprite, x - 1, y + treeHeight + 1);
+        PlaceTile(tileAtlas.leaf.TileSprite, x - 1, y + treeHeight);
 
-        PlaceTile(leaf, x + 1, y + treeHeight + 1);
-        PlaceTile(leaf, x + 1, y + treeHeight);
+        PlaceTile(tileAtlas.leaf.TileSprite, x + 1, y + treeHeight + 1);
+        PlaceTile(tileAtlas.leaf.TileSprite, x + 1, y + treeHeight);
     }
 
     public void PlaceTile(Sprite tileSprite, int x, int y)
