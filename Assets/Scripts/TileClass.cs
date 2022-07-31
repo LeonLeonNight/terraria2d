@@ -6,5 +6,5 @@ using UnityEngine;
 public class TileClass : ScriptableObject
 {
     [SerializeField] public string TileName;
-    [SerializeField] public Sprite TileSprite;
+    [SerializeField] public Sprite[] TileSprites;
 }

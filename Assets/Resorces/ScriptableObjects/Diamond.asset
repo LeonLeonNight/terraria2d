@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: Diamond
   m_EditorClassIdentifier: 
   TileName: Diamond
-  TileSprite: {fileID: 21300000, guid: af9dc289f2f5bbe419bad64d7a6e3591, type: 3}
+  TileSprites:
+  - {fileID: 21300000, guid: af9dc289f2f5bbe419bad64d7a6e3591, type: 3}
+  - {fileID: 21300000, guid: 3770f818e0ea6c3468d576c717db0699, type: 3}

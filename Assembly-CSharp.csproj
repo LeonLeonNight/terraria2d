@@ -59,6 +59,7 @@
     <Compile Include="Assets\Scripts\TerrainGeneration.cs" />
     <Compile Include="Assets\Scripts\TileClass.cs" />
     <Compile Include="Assets\Scripts\TileAtlas.cs" />
+    <Compile Include="Assets\Scripts\OreClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

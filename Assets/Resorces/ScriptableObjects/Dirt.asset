@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: Dirt
   m_EditorClassIdentifier: 
   TileName: Dirt
-  TileSprite: {fileID: 21300000, guid: 8a4dc49360299814192d8d5daac6a27c, type: 3}
+  TileSprites:
+  - {fileID: 21300000, guid: 8a4dc49360299814192d8d5daac6a27c, type: 3}
+  - {fileID: 21300000, guid: 843d2cd0cdd745046a252a85e0a4b01d, type: 3}
