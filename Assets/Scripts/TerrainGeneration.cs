@@ -7,6 +7,14 @@ public class TerrainGeneration : MonoBehaviour
 {
     [Header("Tile Atlas")]
     public TileAtlas tileAtlas;
+    public float seed = -5229;
+
+    public BiomeClass[] biomes;
+
+    [Header("Biomes")]
+    public float biomeFrequency;
+    public Gradient biomeColors;
+    public Texture2D biomeMap;
 
     [Header("Tree confs")]
     public int treeChance = 15;
@@ -17,69 +25,80 @@ public class TerrainGeneration : MonoBehaviour
     public int tallGrassChance = 10;
 
     [Header("Generation Settings")]
-    public int chunckSize = 20; // ошибка при делении 100 на 16 как пример
+    public int chunckSize = 20;
     public bool generatCaves = true;
     public float surfaceValue = 0.25f;
-    public int worldSize = 100;
     public float heightMultiplier = 25;
-    public int heightAddition = 25;
     public int dirtLayerHeight = 5;
+    public int heightAddition = 25;
+    public int worldSize = 100;
 
     [Header("Noise Settings")]
     public float caveFreq = 0.04f;
     public float terrainFreq = 0.08f;
-    public float seed = -5229;
     public Texture2D caveNoiseTexture;
 
     [Header("Ore Settings")]
     public OreClass[] ores;
-    /* public float coalRarity;//0.1
-     public float coalSize;//0.8
-     public float ironRarity, ironSize; //0.09 0.8
-     public float goldRarity, goldSize; //0.2 0.9
-     public float diamondRarity, diamondSize; // 0.8 0.93
-
-     public Texture2D coalSpread;
-     public Texture2D ironSpread;
-     public Texture2D goldSpread;
-     public Texture2D diamondSpread;*/
 
     private GameObject[] worldChunks;
     private List<Vector2> worldTiles = new List<Vector2>();
 
-    void OnValidate()
+    private void OnValidate()
     {
-        caveNoiseTexture = new Texture2D(worldSize, worldSize);
-        ores[0].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[1].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[2].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[3].spreadTexture = new Texture2D(worldSize, worldSize);
+        DrawTextures();
+    }
 
-        GenerationNoiseTexture(caveFreq, surfaceValue, caveNoiseTexture);
-        //ores
-        GenerationNoiseTexture(ores[0].rarity, ores[0].size, ores[0].spreadTexture);
-        GenerationNoiseTexture(ores[1].rarity, ores[1].size, ores[1].spreadTexture);
-        GenerationNoiseTexture(ores[2].rarity, ores[2].size, ores[2].spreadTexture);
-        GenerationNoiseTexture(ores[3].rarity, ores[3].size, ores[3].spreadTexture);
+    public void DrawTextures()
+    {
+        biomeMap = new Texture2D(worldSize, worldSize);
+        DrawBiomeTexture();
 
+        for (int i = 0; i < biomes.Length; i++)
+        {
+            biomes[i].caveNoiseTexture = new Texture2D(worldSize, worldSize);
+
+            for (int o = 0; o < biomes[i].ores.Length; o++)
+            {
+                biomes[i].ores[o].spreadTexture = new Texture2D(worldSize, worldSize);
+            }
+
+            GenerationNoiseTexture(
+                biomes[i].caveFreq,
+                biomes[i].surfaceValue,
+                biomes[i].caveNoiseTexture);
+           
+            //ores
+            for (int o = 0; o < biomes[i].ores.Length; o++)
+            {
+                GenerationNoiseTexture(
+                    biomes[i].ores[o].rarity, 
+                    biomes[i].ores[o].size, 
+                    biomes[i].ores[o].spreadTexture);
+            }
+        }
+    }
+
+    public void DrawBiomeTexture()
+    {
+        for (int x = 0; x < biomeMap.width; x++)
+        {
+            for (int y = 0; y < biomeMap.height; y++)
+            {
+                float v = Mathf.PerlinNoise((x + seed) * biomeFrequency, (y + seed) * biomeFrequency);
+                Color col = biomeColors.Evaluate(v);
+                biomeMap.SetPixel(x, y, col);
+            }
+        }
+
+        biomeMap.Apply();
     }
 
     void Start()
     {
         seed = UnityEngine.Random.Range(-100, 100);
 
-        caveNoiseTexture = new Texture2D(worldSize, worldSize);
-        ores[0].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[1].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[2].spreadTexture = new Texture2D(worldSize, worldSize);
-        ores[3].spreadTexture = new Texture2D(worldSize, worldSize);
-
-        GenerationNoiseTexture(caveFreq, surfaceValue, caveNoiseTexture);
-        //ores
-        GenerationNoiseTexture(ores[0].rarity, ores[0].size, ores[0].spreadTexture);
-        GenerationNoiseTexture(ores[1].rarity, ores[1].size, ores[1].spreadTexture);
-        GenerationNoiseTexture(ores[2].rarity, ores[2].size, ores[2].spreadTexture);
-        GenerationNoiseTexture(ores[3].rarity, ores[3].size, ores[3].spreadTexture);
+        DrawTextures();
 
         CreateChunks();
         GenerationTiles();
@@ -205,18 +224,21 @@ public class TerrainGeneration : MonoBehaviour
 
     public void PlaceTile(Sprite[] tileSprites, int x, int y)
     {
-        GameObject newTile = new GameObject();
+        if (!worldTiles.Contains(new Vector2Int(x, y)))
+        {
+            GameObject newTile = new GameObject();
 
-        float chunckCoord = (Mathf.RoundToInt(x / chunckSize) * chunckSize);
-        chunckCoord /= chunckSize;
-        newTile.transform.parent = worldChunks[(int)chunckCoord].transform;
+            float chunckCoord = (Mathf.RoundToInt(x / chunckSize) * chunckSize);
+            chunckCoord /= chunckSize;
+            newTile.transform.parent = worldChunks[(int)chunckCoord].transform;
 
-        newTile.AddComponent<SpriteRenderer>();
-        int spriteIndex = UnityEngine.Random.Range(0, tileSprites.Length);
-        newTile.GetComponent<SpriteRenderer>().sprite = tileSprites[spriteIndex];
-        newTile.name = tileSprites[0].name;
-        newTile.transform.position = new Vector2(x + 0.5f, y + 0.5f);
+            newTile.AddComponent<SpriteRenderer>();
+            int spriteIndex = UnityEngine.Random.Range(0, tileSprites.Length);
+            newTile.GetComponent<SpriteRenderer>().sprite = tileSprites[spriteIndex];
+            newTile.name = tileSprites[0].name;
+            newTile.transform.position = new Vector2(x + 0.5f, y + 0.5f);
 
-        worldTiles.Add(newTile.transform.position - Vector3.one * 0.5f);
+            worldTiles.Add(newTile.transform.position - Vector3.one * 0.5f);
+        }
     }
 }

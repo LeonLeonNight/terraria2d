@@ -3,7 +3,19 @@ guid: 07033b1fc02dc2f40937f189e63024c3
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - stone: {instanceID: 0}
+  - grass: {instanceID: 0}
+  - dirt: {instanceID: 0}
+  - log: {instanceID: 0}
+  - leaf: {instanceID: 0}
+  - tallGrass: {instanceID: 0}
+  - snow: {fileID: 11400000, guid: 75f6704847ff4d74bbce5cb58cee51f6, type: 2}
+  - sand: {fileID: 11400000, guid: 1b58ff3d0f8721a4ea71d92cf10c5fe8, type: 2}
+  - coal: {instanceID: 0}
+  - iron: {instanceID: 0}
+  - gold: {instanceID: 0}
+  - diamond: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
