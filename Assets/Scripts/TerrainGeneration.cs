@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class TerrainGeneration : MonoBehaviour
 {
+    #region Params
     [Header("Tile Atlas")]
     public TileAtlas tileAtlas;
     public float seed = -5229;
@@ -13,7 +15,7 @@ public class TerrainGeneration : MonoBehaviour
 
     [Header("Biomes")]
     public float biomeFrequency;
-    public Gradient biomeColors;
+    public Gradient biomeGradient;
     public Texture2D biomeMap;
 
     [Header("Tree confs")]
@@ -43,7 +45,8 @@ public class TerrainGeneration : MonoBehaviour
 
     private GameObject[] worldChunks;
     private List<Vector2> worldTiles = new List<Vector2>();
-
+    private BiomeClass curBiome;
+    #endregion
     private void OnValidate()
     {
         DrawTextures();
@@ -86,7 +89,7 @@ public class TerrainGeneration : MonoBehaviour
             for (int y = 0; y < biomeMap.height; y++)
             {
                 float v = Mathf.PerlinNoise((x + seed) * biomeFrequency, (y + seed) * biomeFrequency);
-                Color col = biomeColors.Evaluate(v);
+                Color col = biomeGradient.Evaluate(v);
                 biomeMap.SetPixel(x, y, col);
             }
         }
@@ -118,20 +121,32 @@ public class TerrainGeneration : MonoBehaviour
         }
     }
 
+    public BiomeClass GetCurrentBiome(int x, int y)
+    {
+        for (int i = 0; i < biomes.Length; i++)
+        {
+            if (biomes[i].biomeCol == biomeMap.GetPixel(x, y))
+            {
+                return biomes[i];
+            }
+        }
+        return curBiome;
+    }
+
     public void GenerationTiles()
     {
+        Sprite[] tileSprites;
+
         for (int x = 0; x < worldSize; x++)
         {
             float height = Mathf.PerlinNoise((x + seed) * terrainFreq, seed * terrainFreq) * heightMultiplier + heightAddition;
 
             for (int y = 0; y < height; y++)
             {
-                Sprite[] tileSprites;
-
                 if (y < height - dirtLayerHeight)
                 {
-                    tileSprites = tileAtlas.stone.TileSprites;
-
+                    tileSprites = GetCurrentBiome(x, y).tileAtlas.stone.TileSprites;
+                    
                     if (ores[0].spreadTexture.GetPixel(x, y).r > 0.5f && height - y > ores[0].maxSpawnHeight)
                         tileSprites = tileAtlas.coal.TileSprites;
                     if (ores[1].spreadTexture.GetPixel(x, y).r > 0.5f && height - y > ores[1].maxSpawnHeight)

@@ -7,9 +7,11 @@ using UnityEngine;
 public class BiomeClass 
 {
     public string biomeName;
-    //public Color biomeColor;
 
-    public TileAtlas biomeTiles;
+    public Color biomeCol;
+    //public float biomeTemp;
+
+    public TileAtlas tileAtlas;
 
     [Header("Noise Settings")]
     public float caveFreq = 0.04f;
