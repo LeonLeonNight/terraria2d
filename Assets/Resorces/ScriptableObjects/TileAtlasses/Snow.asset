@@ -17,7 +17,7 @@ MonoBehaviour:
   dirt: {fileID: 11400000, guid: 100457a4a43db9c4e982be717f438296, type: 2}
   log: {fileID: 0}
   leaf: {fileID: 0}
-  tallGrass: {fileID: 0}
+  tallGrass: {fileID: 11400000, guid: 75f6704847ff4d74bbce5cb58cee51f6, type: 2}
   snow: {fileID: 0}
   sand: {fileID: 0}
   coal: {fileID: 0}
