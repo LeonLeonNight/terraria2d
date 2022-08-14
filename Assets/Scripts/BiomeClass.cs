@@ -9,19 +9,16 @@ public class BiomeClass
     public string biomeName;
 
     public Color biomeCol;
-    //public float biomeTemp;
 
     public TileAtlas tileAtlas;
 
     [Header("Noise Settings")]
-    public float caveFreq = 0.04f;
-    public float terrainFreq = 0.08f;
     public Texture2D caveNoiseTexture;
 
     [Header("Generation Settings")]
     public bool generatCaves = true;
     public float surfaceValue = 0.25f;
-    public float heightMultiplier = 25;
+    public float heightMultiplier = 4f;
     public int dirtLayerHeight = 5;
 
     [Header("Tree confs")]
